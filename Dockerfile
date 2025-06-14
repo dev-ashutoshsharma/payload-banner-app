@@ -1,20 +1,33 @@
-# Use an official Node.js runtime as a parent image
-FROM node:16
+# Stage 1: Build
+FROM node:16 AS builder
 
-# Set the working directory
+# Set working directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json (if available)
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application files
+# Copy the source files
 COPY . .
 
-# Expose the application port (e.g., port 3000)
+# Build the project
+RUN npm run build
+
+# Stage 2: Production
+FROM node:16
+
+WORKDIR /usr/src/app
+
+# Copy only the necessary build artifacts from the builder
+COPY --from=builder /usr/src/app/package*.json ./
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/dist ./dist
+
+# Expose the port Payload runs on (usually 3000)
 EXPOSE 3000
 
-# Define the command to run your application
-CMD ["npm", "serve"]
+# Start the server
+CMD ["npm", "run", "serve"]
