@@ -15,8 +15,8 @@ jobs:
 
       - name: Install sshpass
         run: |
-          sudo yum install -y epel-release
-          sudo yum install -y sshpass || sudo apt install -y sshpass  # fallback for testing
+          sudo apt-get update
+          sudo apt-get install -y sshpass
 
       - name: Deploy to Server
         run: |
