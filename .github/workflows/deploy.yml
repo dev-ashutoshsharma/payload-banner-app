@@ -25,11 +25,14 @@ jobs:
           if [ ! -d "/home/user/your-repo" ]; then
             git clone https://dev-ashutoshsharma:${{ secrets.TOKEN_GITHUB }}@github.com/dev-ashutoshsharma/payload-banner-app.git /root/banner-app
           fi
-            cd /root/banner-app
 
-            
-            git pull origin main
-            npm install
-            npm run deploy
-            npm run serve
+          cd /root/banner-app
+
+          git pull origin main
+          npm install
+          pm2 delete payload-app || true
+          pm2 start npm --name "payload-app" -- Serve
+          pm2 save
+          pm2 startup
+
           EOF
