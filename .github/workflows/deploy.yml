@@ -1,0 +1,35 @@
+name: CI/CD with SSH Password & YUM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install sshpass
+        run: |
+          sudo yum install -y epel-release
+          sudo yum install -y sshpass || sudo apt install -y sshpass  # fallback for testing
+
+      - name: Deploy to Server
+        run: |
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} << 'EOF'
+
+          if [ ! -d "/home/user/your-repo" ]; then
+            git clone https://dev-ashutoshsharma:${{ secrets.TOKEN_GITHUB }}@github.com/dev-ashutoshsharma/payload-banner-app.git /root/banner-app
+          fi
+            cd /root/banner-app
+
+            
+            git pull origin main
+            npm install
+            npm run deploy
+            npm run serve
+          EOF
